@@ -317,15 +317,6 @@ contract HelloToken is HelloTokenGovernance, HelloTokenMessages, ReentrancyGuard
         return getBalance(token) - balanceBefore;
     }
 
-    function getBalance(address token) internal view returns (uint256 balance) {
-        // fetch the specified token balance for this contract
-        (, bytes memory queriedBalance) =
-            token.staticcall(
-                abi.encodeWithSelector(IERC20.balanceOf.selector, address(this))
-            );
-        balance = abi.decode(queriedBalance, (uint256));
-    }
-
     function addressToBytes32(address address_) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(address_)));
     }
@@ -333,6 +324,15 @@ contract HelloToken is HelloTokenGovernance, HelloTokenMessages, ReentrancyGuard
     function bytes32ToAddress(bytes32 address_) internal pure returns (address) {
         require(bytes12(address_) == 0, "invalid EVM address");
         return address(uint160(uint256(address_)));
+    }
+
+    function getBalance(address token) internal view returns (uint256 balance) {
+        // fetch the specified token balance for this contract
+        (, bytes memory queriedBalance) =
+            token.staticcall(
+                abi.encodeWithSelector(IERC20.balanceOf.selector, address(this))
+            );
+        balance = abi.decode(queriedBalance, (uint256));
     }
 
     function getDecimals(
@@ -347,7 +347,7 @@ contract HelloToken is HelloTokenGovernance, HelloTokenMessages, ReentrancyGuard
     function normalizeAmount(
         uint256 amount,
         uint8 decimals
-    ) public pure returns(uint256) {
+    ) internal pure returns(uint256) {
         if (decimals > 8) {
             amount /= 10 ** (decimals - 8);
         }
